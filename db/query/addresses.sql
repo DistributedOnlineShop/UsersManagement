@@ -1,5 +1,6 @@
 -- name: CreateAddress :one
 INSERT INTO ADDRESSES (
+    ADDRESS_ID,
     USER_ID,
     ADDRESS,
     CITY,
@@ -14,10 +15,11 @@ INSERT INTO ADDRESSES (
     $4,
     $5,
     $6,
-    $7
+    $7,
+    $8
 ) RETURNING *;
 
--- name: GetAddresses :many
+-- name: GetAddressesByUserID :many
 SELECT 
     ADDRESS_ID,
     ADDRESS,
@@ -49,15 +51,14 @@ UPDATE ADDRESSES
 SET 
     IS_DEFAULT = FALSE
 WHERE 
-    USER_ID = $1 RETURNING *;
+    ADDRESS_ID = $1 RETURNING *;
 
 -- name: SetDefaultAddress :one
 UPDATE ADDRESSES
 SET
     IS_DEFAULT = TRUE
 WHERE
-    USER_ID = $1 AND ADDRESS_ID = $2
-    RETURNING *;
+    ADDRESS_ID = $1 RETURNING *;
 
 -- name: DeleteAddress :exec
 DELETE FROM ADDRESSES

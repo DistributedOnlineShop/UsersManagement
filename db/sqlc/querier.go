@@ -15,15 +15,15 @@ type Querier interface {
 	CreateToken(ctx context.Context, arg CreateTokenParams) (Token, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	DeleteAddress(ctx context.Context, arg DeleteAddressParams) error
-	GetAddresses(ctx context.Context, userID uuid.UUID) ([]GetAddressesRow, error)
-	GetUserData(ctx context.Context, userID uuid.UUID) (GetUserDataRow, error)
-	ResetDefaultAddress(ctx context.Context, userID uuid.UUID) (Address, error)
+	GetAddressesByUserID(ctx context.Context, userID uuid.UUID) ([]GetAddressesByUserIDRow, error)
+	GetUserById(ctx context.Context, userID uuid.UUID) (GetUserByIdRow, error)
+	ResetDefaultAddress(ctx context.Context, addressID uuid.UUID) (Address, error)
 	ResetEmail(ctx context.Context, arg ResetEmailParams) (User, error)
 	ResetPassword(ctx context.Context, arg ResetPasswordParams) (User, error)
 	ResetPhoneNumber(ctx context.Context, arg ResetPhoneNumberParams) (User, error)
-	SetDefaultAddress(ctx context.Context, arg SetDefaultAddressParams) (Address, error)
+	SetDefaultAddress(ctx context.Context, addressID uuid.UUID) (Address, error)
 	UpdateAddress(ctx context.Context, arg UpdateAddressParams) (Address, error)
-	UserLogin(ctx context.Context, email string) (string, error)
+	UserLogin(ctx context.Context, email string) ([]byte, error)
 }
 
 var _ Querier = (*Queries)(nil)

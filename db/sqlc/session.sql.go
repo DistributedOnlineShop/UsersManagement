@@ -31,9 +31,9 @@ INSERT INTO TOKENS (
 type CreateTokenParams struct {
 	TokenID   uuid.UUID        `json:"token_id"`
 	Email     string           `json:"email"`
-	Token     pgtype.Text      `json:"token"`
+	Token     uuid.UUID        `json:"token"`
 	Status    string           `json:"status"`
-	ExpiresAt pgtype.TIMESTAMP(0) `json:"expires_at"`
+	ExpiresAt pgtype.Timestamp `json:"expires_at"`
 }
 
 func (q *Queries) CreateToken(ctx context.Context, arg CreateTokenParams) (Token, error) {

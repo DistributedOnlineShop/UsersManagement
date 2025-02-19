@@ -9,11 +9,11 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createAddress = `-- name: CreateAddress :one
 INSERT INTO ADDRESSES (
+    ADDRESS_ID,
     USER_ID,
     ADDRESS,
     CITY,
@@ -28,22 +28,25 @@ INSERT INTO ADDRESSES (
     $4,
     $5,
     $6,
-    $7
+    $7,
+    $8
 ) RETURNING address_id, user_id, address, city, state, postal_code, country, is_default, created_at, updated_at
 `
 
 type CreateAddressParams struct {
-	UserID     uuid.UUID   `json:"user_id"`
-	Address    string      `json:"address"`
-	City       pgtype.Text `json:"city"`
-	State      pgtype.Text `json:"state"`
-	PostalCode pgtype.Text `json:"postal_code"`
-	Country    pgtype.Text `json:"country"`
-	IsDefault  bool        `json:"is_default"`
+	AddressID  uuid.UUID `json:"address_id"`
+	UserID     uuid.UUID `json:"user_id"`
+	Address    string    `json:"address"`
+	City       string    `json:"city"`
+	State      string    `json:"state"`
+	PostalCode string    `json:"postal_code"`
+	Country    string    `json:"country"`
+	IsDefault  bool      `json:"is_default"`
 }
 
 func (q *Queries) CreateAddress(ctx context.Context, arg CreateAddressParams) (Address, error) {
 	row := q.db.QueryRow(ctx, createAddress,
+		arg.AddressID,
 		arg.UserID,
 		arg.Address,
 		arg.City,
@@ -84,7 +87,7 @@ func (q *Queries) DeleteAddress(ctx context.Context, arg DeleteAddressParams) er
 	return err
 }
 
-const getAddresses = `-- name: GetAddresses :many
+const getAddressesByUserID = `-- name: GetAddressesByUserID :many
 SELECT 
     ADDRESS_ID,
     ADDRESS,
@@ -99,25 +102,25 @@ WHERE
     USER_ID = $1
 `
 
-type GetAddressesRow struct {
-	AddressID  uuid.UUID   `json:"address_id"`
-	Address    string      `json:"address"`
-	City       pgtype.Text `json:"city"`
-	State      pgtype.Text `json:"state"`
-	PostalCode pgtype.Text `json:"postal_code"`
-	Country    pgtype.Text `json:"country"`
-	IsDefault  bool        `json:"is_default"`
+type GetAddressesByUserIDRow struct {
+	AddressID  uuid.UUID `json:"address_id"`
+	Address    string    `json:"address"`
+	City       string    `json:"city"`
+	State      string    `json:"state"`
+	PostalCode string    `json:"postal_code"`
+	Country    string    `json:"country"`
+	IsDefault  bool      `json:"is_default"`
 }
 
-func (q *Queries) GetAddresses(ctx context.Context, userID uuid.UUID) ([]GetAddressesRow, error) {
-	rows, err := q.db.Query(ctx, getAddresses, userID)
+func (q *Queries) GetAddressesByUserID(ctx context.Context, userID uuid.UUID) ([]GetAddressesByUserIDRow, error) {
+	rows, err := q.db.Query(ctx, getAddressesByUserID, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []GetAddressesRow{}
+	items := []GetAddressesByUserIDRow{}
 	for rows.Next() {
-		var i GetAddressesRow
+		var i GetAddressesByUserIDRow
 		if err := rows.Scan(
 			&i.AddressID,
 			&i.Address,
@@ -142,11 +145,11 @@ UPDATE ADDRESSES
 SET 
     IS_DEFAULT = FALSE
 WHERE 
-    USER_ID = $1 RETURNING address_id, user_id, address, city, state, postal_code, country, is_default, created_at, updated_at
+    ADDRESS_ID = $1 RETURNING address_id, user_id, address, city, state, postal_code, country, is_default, created_at, updated_at
 `
 
-func (q *Queries) ResetDefaultAddress(ctx context.Context, userID uuid.UUID) (Address, error) {
-	row := q.db.QueryRow(ctx, resetDefaultAddress, userID)
+func (q *Queries) ResetDefaultAddress(ctx context.Context, addressID uuid.UUID) (Address, error) {
+	row := q.db.QueryRow(ctx, resetDefaultAddress, addressID)
 	var i Address
 	err := row.Scan(
 		&i.AddressID,
@@ -168,17 +171,11 @@ UPDATE ADDRESSES
 SET
     IS_DEFAULT = TRUE
 WHERE
-    USER_ID = $1 AND ADDRESS_ID = $2
-    RETURNING address_id, user_id, address, city, state, postal_code, country, is_default, created_at, updated_at
+    ADDRESS_ID = $1 RETURNING address_id, user_id, address, city, state, postal_code, country, is_default, created_at, updated_at
 `
 
-type SetDefaultAddressParams struct {
-	UserID    uuid.UUID `json:"user_id"`
-	AddressID uuid.UUID `json:"address_id"`
-}
-
-func (q *Queries) SetDefaultAddress(ctx context.Context, arg SetDefaultAddressParams) (Address, error) {
-	row := q.db.QueryRow(ctx, setDefaultAddress, arg.UserID, arg.AddressID)
+func (q *Queries) SetDefaultAddress(ctx context.Context, addressID uuid.UUID) (Address, error) {
+	row := q.db.QueryRow(ctx, setDefaultAddress, addressID)
 	var i Address
 	err := row.Scan(
 		&i.AddressID,
@@ -210,13 +207,13 @@ WHERE
 `
 
 type UpdateAddressParams struct {
-	AddressID  uuid.UUID   `json:"address_id"`
-	Address    string      `json:"address"`
-	City       pgtype.Text `json:"city"`
-	State      pgtype.Text `json:"state"`
-	PostalCode pgtype.Text `json:"postal_code"`
-	Country    pgtype.Text `json:"country"`
-	IsDefault  bool        `json:"is_default"`
+	AddressID  uuid.UUID `json:"address_id"`
+	Address    string    `json:"address"`
+	City       string    `json:"city"`
+	State      string    `json:"state"`
+	PostalCode string    `json:"postal_code"`
+	Country    string    `json:"country"`
+	IsDefault  bool      `json:"is_default"`
 }
 
 func (q *Queries) UpdateAddress(ctx context.Context, arg UpdateAddressParams) (Address, error) {

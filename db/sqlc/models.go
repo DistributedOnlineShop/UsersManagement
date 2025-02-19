@@ -13,22 +13,22 @@ type Address struct {
 	AddressID  uuid.UUID        `json:"address_id"`
 	UserID     uuid.UUID        `json:"user_id"`
 	Address    string           `json:"address"`
-	City       pgtype.Text      `json:"city"`
-	State      pgtype.Text      `json:"state"`
-	PostalCode pgtype.Text      `json:"postal_code"`
-	Country    pgtype.Text      `json:"country"`
+	City       string           `json:"city"`
+	State      string           `json:"state"`
+	PostalCode string           `json:"postal_code"`
+	Country    string           `json:"country"`
 	IsDefault  bool             `json:"is_default"`
-	CreatedAt  pgtype.TIMESTAMP(0) `json:"created_at"`
-	UpdatedAt  pgtype.TIMESTAMP(0) `json:"updated_at"`
+	CreatedAt  pgtype.Timestamp `json:"created_at"`
+	UpdatedAt  pgtype.Timestamp `json:"updated_at"`
 }
 
 type Token struct {
 	TokenID   uuid.UUID        `json:"token_id"`
 	Email     string           `json:"email"`
-	Token     pgtype.Text      `json:"token"`
+	Token     uuid.UUID        `json:"token"`
 	Status    string           `json:"status"`
-	CreatedAt pgtype.TIMESTAMP(0) `json:"created_at"`
-	ExpiresAt pgtype.TIMESTAMP(0) `json:"expires_at"`
+	CreatedAt pgtype.Timestamp `json:"created_at"`
+	ExpiresAt pgtype.Timestamp `json:"expires_at"`
 }
 
 type User struct {
@@ -37,8 +37,8 @@ type User struct {
 	LastName     string           `json:"last_name"`
 	Email        string           `json:"email"`
 	PhoneNumber  string           `json:"phone_number"`
-	PasswordHash string           `json:"password_hash"`
+	PasswordHash []byte           `json:"password_hash"`
 	Status       string           `json:"status"`
-	CreatedAt    pgtype.TIMESTAMP(0) `json:"created_at"`
-	UpdatedAt    pgtype.TIMESTAMP(0) `json:"updated_at"`
+	CreatedAt    pgtype.Timestamp `json:"created_at"`
+	UpdatedAt    pgtype.Timestamp `json:"updated_at"`
 }
