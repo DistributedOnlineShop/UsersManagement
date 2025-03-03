@@ -11,12 +11,11 @@ func Hash(password, salt string) ([]byte, error) {
 	}
 
 	hash := argon2.Key([]byte(password), []byte(salt), Config.TimeCost, Config.MemoryCost, Config.Parallelism, Config.KeyLength)
-
 	return hash, nil
 }
 
 func Verify(password, salt string, hash []byte) bool {
-	Config, err := LoadConfig("../app.env")
+	Config, err := LoadConfig("../")
 	if err != nil {
 		return false
 	}

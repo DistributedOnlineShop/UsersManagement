@@ -30,5 +30,18 @@ test:
 server:
 	go run .
 
+protob:
+	rm -f pb/users/*.go
+	rm -f pb/verification/*.go
 
-.PHONY: postgres dropPsql createDB dropDB migrateup migratedown sqlc redis dropRedis test server
+	protoc --proto_path=proto --go_out=pb/users --go_opt=paths=source_relative \
+	--go-grpc_out=pb/users --go-grpc_opt=paths=source_relative \
+	--grpc-gateway_out=pb/users --grpc-gateway_opt paths=source_relative \
+    proto/service_users.proto
+
+	protoc --proto_path=proto --go_out=pb/verification --go_opt=paths=source_relative \
+	--go-grpc_out=pb/verification --go-grpc_opt=paths=source_relative \
+	--grpc-gateway_out=pb/verification --grpc-gateway_opt paths=source_relative \
+    proto/service_verification.proto
+
+.PHONY: postgres dropPsql createDB dropDB migrateup migratedown sqlc redis dropRedis test server protob

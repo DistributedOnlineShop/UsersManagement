@@ -58,9 +58,10 @@ func GenerateSessionStatus() string {
 
 func GenerateUserStatus() string {
 	statuses := []string{
-		"LOGIN",
-		"SIGNUP",
+		"ACTIVE",
+		"INACTIVE",
+		"DELETED",
+		"DISABLED",
 	}
 	return statuses[rand.IntN(len(statuses))]
-
 }
