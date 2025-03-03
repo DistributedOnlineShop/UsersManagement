@@ -21,6 +21,7 @@ type Config struct {
 	Parallelism         uint8         `mapstructure:"PARALLELISM"`
 	KeyLength           uint32        `mapstructure:"KEY_LENGTH"`
 	UsersManagementPort string        `mapstructure:"USERS_MANAGEMENT_PORT"`
+	KeySeed             string        `mapstructure:"KEY_SEED"`
 }
 
 func LoadConfig(path string) (Config, error) {

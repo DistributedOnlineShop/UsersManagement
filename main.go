@@ -22,7 +22,6 @@ import (
 )
 
 func main() {
-
 	config, err := util.LoadConfig("./")
 	if err != nil {
 		log.Error().Err(err).Msg("app.env is not found")
