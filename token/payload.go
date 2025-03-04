@@ -5,8 +5,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-
-	"UsersManagement/util"
 )
 
 type Payload struct {
@@ -17,18 +15,16 @@ type Payload struct {
 	ExpiredAt time.Time `json:"expired_at"`
 }
 
-func NewPayload(email string, role string) (*Payload, error) {
-	tokenID := util.CreateUUID()
+func NewPayload(email, role string) (*Payload, error) {
+	tokenID := uuid.New()
 
-	payload := &Payload{
+	return &Payload{
 		ID:        tokenID,
 		Email:     email,
 		Role:      role,
 		IssuedAt:  time.Now(),
 		ExpiredAt: time.Now().Add(24 * time.Hour),
-	}
-
-	return payload, nil
+	}, nil
 }
 
 func (payload *Payload) Valid() error {

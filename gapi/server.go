@@ -20,7 +20,7 @@ type Server struct {
 
 func ServerSetup(config util.Config, store db.Store) (*Server, error) {
 
-	keyPair, err := token.CreateKey(config.KeySeed)
+	tokenMaker, err := token.NewPasetoMaker(config.KeySeed)
 	if err != nil {
 		return nil, fmt.Errorf("Fail to Create Key Pair: %v", err)
 	}
@@ -28,6 +28,6 @@ func ServerSetup(config util.Config, store db.Store) (*Server, error) {
 	return &Server{
 		config: config,
 		store:  store,
-		token:  &keyPair,
+		token:  tokenMaker,
 	}, nil
 }

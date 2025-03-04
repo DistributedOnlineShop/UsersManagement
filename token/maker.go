@@ -1,6 +1,6 @@
 package token
 
 type Maker interface {
-	CreateBiscuitToken(email, role string) ([]byte, *Payload, error)
-	VerifyBiscuitToken(serializedToken []byte, payload *Payload) (Payload, error)
+	CreateToken(email string, role string) (string, *Payload, error)
+	VerifyToken(token string) (*Payload, error)
 }
