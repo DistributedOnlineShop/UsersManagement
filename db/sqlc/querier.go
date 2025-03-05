@@ -12,7 +12,7 @@ import (
 
 type Querier interface {
 	CreateAddress(ctx context.Context, arg CreateAddressParams) (Address, error)
-	CreateToken(ctx context.Context, arg CreateTokenParams) (Token, error)
+	CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	DeleteAddress(ctx context.Context, arg DeleteAddressParams) error
 	GetAddressesByUserID(ctx context.Context, userID uuid.UUID) ([]GetAddressesByUserIDRow, error)

@@ -1,6 +1,6 @@
--- name: CreateToken :one
-INSERT INTO TOKENS (
-    token_id,
+-- name: CreateSession :one
+INSERT INTO session (
+    session_id,
     email,
     token,
     status,

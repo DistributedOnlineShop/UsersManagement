@@ -16,8 +16,8 @@ import (
 
 	db "UsersManagement/db/sqlc"
 	"UsersManagement/gapi"
+	pbv "UsersManagement/pb/session"
 	pbu "UsersManagement/pb/users"
-	pbv "UsersManagement/pb/verification"
 	"UsersManagement/util"
 )
 
@@ -51,7 +51,7 @@ func main() {
 	grpcLogger := grpc.UnaryInterceptor(gapi.GrpcLogger)
 	grpcServer := grpc.NewServer(grpcLogger)
 
-	pbv.RegisterVerificationServer(grpcServer, server)
+	pbv.RegisterSessionServer(grpcServer, server)
 	pbu.RegisterUserServiceServer(grpcServer, server)
 
 	reflection.Register(grpcServer)

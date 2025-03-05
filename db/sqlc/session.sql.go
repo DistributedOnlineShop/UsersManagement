@@ -12,9 +12,9 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const createToken = `-- name: CreateToken :one
-INSERT INTO TOKENS (
-    token_id,
+const createSession = `-- name: CreateSession :one
+INSERT INTO session (
+    session_id,
     email,
     token,
     status,
@@ -25,28 +25,28 @@ INSERT INTO TOKENS (
     $3,
     $4,
     $5
-) RETURNING token_id, email, token, status, created_at, expires_at
+) RETURNING session_id, email, token, status, created_at, expires_at
 `
 
-type CreateTokenParams struct {
-	TokenID   uuid.UUID        `json:"token_id"`
+type CreateSessionParams struct {
+	SessionID uuid.UUID        `json:"session_id"`
 	Email     string           `json:"email"`
-	Token     uuid.UUID        `json:"token"`
+	Token     string           `json:"token"`
 	Status    string           `json:"status"`
 	ExpiresAt pgtype.Timestamp `json:"expires_at"`
 }
 
-func (q *Queries) CreateToken(ctx context.Context, arg CreateTokenParams) (Token, error) {
-	row := q.db.QueryRow(ctx, createToken,
-		arg.TokenID,
+func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error) {
+	row := q.db.QueryRow(ctx, createSession,
+		arg.SessionID,
 		arg.Email,
 		arg.Token,
 		arg.Status,
 		arg.ExpiresAt,
 	)
-	var i Token
+	var i Session
 	err := row.Scan(
-		&i.TokenID,
+		&i.SessionID,
 		&i.Email,
 		&i.Token,
 		&i.Status,

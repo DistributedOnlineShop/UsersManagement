@@ -23,15 +23,13 @@ CREATE TABLE "addresses" (
   "updated_at" TIMESTAMP(0)
 );
 
-CREATE TABLE "tokens" (
-  "token_id" UUID PRIMARY KEY NOT NULL,
-  "email" VARCHAR UNIQUE NOT NULL,
-  "token" UUID NOT NULL,
+CREATE TABLE "session" (
+  "session_id" UUID PRIMARY KEY NOT NULL,
+  "email" VARCHAR NOT NULL,
+  "token" VARCHAR NOT NULL,
   "status" VARCHAR NOT NULL,
   "created_at" TIMESTAMP(0) NOT NULL DEFAULT NOW(),
   "expires_at" TIMESTAMP(0) NOT NULL
 );
 
 ALTER TABLE "addresses" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("user_id");
-
-ALTER TABLE "tokens" ADD FOREIGN KEY ("email") REFERENCES "users" ("email");

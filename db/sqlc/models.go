@@ -22,10 +22,10 @@ type Address struct {
 	UpdatedAt  pgtype.Timestamp `json:"updated_at"`
 }
 
-type Token struct {
-	TokenID   uuid.UUID        `json:"token_id"`
+type Session struct {
+	SessionID uuid.UUID        `json:"session_id"`
 	Email     string           `json:"email"`
-	Token     uuid.UUID        `json:"token"`
+	Token     string           `json:"token"`
 	Status    string           `json:"status"`
 	CreatedAt pgtype.Timestamp `json:"created_at"`
 	ExpiresAt pgtype.Timestamp `json:"expires_at"`

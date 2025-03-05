@@ -4,15 +4,15 @@ import (
 	"fmt"
 
 	db "UsersManagement/db/sqlc"
+	pbv "UsersManagement/pb/session"
 	pbu "UsersManagement/pb/users"
-	pbv "UsersManagement/pb/verification"
 	"UsersManagement/token"
 	"UsersManagement/util"
 )
 
 type Server struct {
 	pbu.UnimplementedUserServiceServer
-	pbv.UnimplementedVerificationServer
+	pbv.UnimplementedSessionServer
 	config util.Config
 	token  token.Maker
 	store  db.Store
