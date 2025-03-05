@@ -66,7 +66,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 	return i, err
 }
 
-const getUserById = `-- name: GetUserById :one
+const getUserByEmail = `-- name: GetUserByEmail :one
 SELECT
     frist_name,
     last_name,
@@ -75,19 +75,19 @@ SELECT
 FROM 
     USERS
 WHERE
-    user_id = $1
+    email = $1
 `
 
-type GetUserByIdRow struct {
+type GetUserByEmailRow struct {
 	FristName   string `json:"frist_name"`
 	LastName    string `json:"last_name"`
 	Email       string `json:"email"`
 	PhoneNumber string `json:"phone_number"`
 }
 
-func (q *Queries) GetUserById(ctx context.Context, userID uuid.UUID) (GetUserByIdRow, error) {
-	row := q.db.QueryRow(ctx, getUserById, userID)
-	var i GetUserByIdRow
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error) {
+	row := q.db.QueryRow(ctx, getUserByEmail, email)
+	var i GetUserByEmailRow
 	err := row.Scan(
 		&i.FristName,
 		&i.LastName,
@@ -97,13 +97,13 @@ func (q *Queries) GetUserById(ctx context.Context, userID uuid.UUID) (GetUserByI
 	return i, err
 }
 
-const resetEmail = `-- name: ResetEmail :one
+const resetEmail = `-- name: ResetEmail :exec
 UPDATE USERS
 SET
     EMAIL = $2,
     UPDATED_AT = NOW()
 WHERE
-    phone_number = $1 RETURNING user_id, frist_name, last_name, email, phone_number, password_hash, status, created_at, updated_at
+    phone_number = $1
 `
 
 type ResetEmailParams struct {
@@ -111,30 +111,18 @@ type ResetEmailParams struct {
 	Email       string `json:"email"`
 }
 
-func (q *Queries) ResetEmail(ctx context.Context, arg ResetEmailParams) (User, error) {
-	row := q.db.QueryRow(ctx, resetEmail, arg.PhoneNumber, arg.Email)
-	var i User
-	err := row.Scan(
-		&i.UserID,
-		&i.FristName,
-		&i.LastName,
-		&i.Email,
-		&i.PhoneNumber,
-		&i.PasswordHash,
-		&i.Status,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
+func (q *Queries) ResetEmail(ctx context.Context, arg ResetEmailParams) error {
+	_, err := q.db.Exec(ctx, resetEmail, arg.PhoneNumber, arg.Email)
+	return err
 }
 
-const resetPassword = `-- name: ResetPassword :one
+const resetPassword = `-- name: ResetPassword :exec
 UPDATE USERS
 SET
     PASSWORD_HASH = $2,
     UPDATED_AT = NOW()
 WHERE
-    EMAIL = $1 RETURNING user_id, frist_name, last_name, email, phone_number, password_hash, status, created_at, updated_at
+    EMAIL = $1
 `
 
 type ResetPasswordParams struct {
@@ -142,30 +130,18 @@ type ResetPasswordParams struct {
 	PasswordHash []byte `json:"password_hash"`
 }
 
-func (q *Queries) ResetPassword(ctx context.Context, arg ResetPasswordParams) (User, error) {
-	row := q.db.QueryRow(ctx, resetPassword, arg.Email, arg.PasswordHash)
-	var i User
-	err := row.Scan(
-		&i.UserID,
-		&i.FristName,
-		&i.LastName,
-		&i.Email,
-		&i.PhoneNumber,
-		&i.PasswordHash,
-		&i.Status,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
+func (q *Queries) ResetPassword(ctx context.Context, arg ResetPasswordParams) error {
+	_, err := q.db.Exec(ctx, resetPassword, arg.Email, arg.PasswordHash)
+	return err
 }
 
-const resetPhoneNumber = `-- name: ResetPhoneNumber :one
+const resetPhoneNumber = `-- name: ResetPhoneNumber :exec
 UPDATE USERS
 SET
     phone_number = $2,
     UPDATED_AT = NOW()
 WHERE
-    EMAIL = $1 RETURNING user_id, frist_name, last_name, email, phone_number, password_hash, status, created_at, updated_at
+    EMAIL = $1
 `
 
 type ResetPhoneNumberParams struct {
@@ -173,21 +149,9 @@ type ResetPhoneNumberParams struct {
 	PhoneNumber string `json:"phone_number"`
 }
 
-func (q *Queries) ResetPhoneNumber(ctx context.Context, arg ResetPhoneNumberParams) (User, error) {
-	row := q.db.QueryRow(ctx, resetPhoneNumber, arg.Email, arg.PhoneNumber)
-	var i User
-	err := row.Scan(
-		&i.UserID,
-		&i.FristName,
-		&i.LastName,
-		&i.Email,
-		&i.PhoneNumber,
-		&i.PasswordHash,
-		&i.Status,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
+func (q *Queries) ResetPhoneNumber(ctx context.Context, arg ResetPhoneNumberParams) error {
+	_, err := q.db.Exec(ctx, resetPhoneNumber, arg.Email, arg.PhoneNumber)
+	return err
 }
 
 const userLogin = `-- name: UserLogin :one

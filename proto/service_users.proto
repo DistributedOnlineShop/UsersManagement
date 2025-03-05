@@ -12,7 +12,7 @@ message UserInformationRequest{
 
 message UserInformationResponse{
     string email = 1;
-    string first_name = 2;
+    string frist_name = 2;
     string last_name = 3;
     string phone_number = 4;
 }
@@ -38,18 +38,20 @@ message LoginRequest{
 }
 
 message LoginResponse{
-    string user_id = 1;
+    string session_id = 1;
     string token = 2;
 }
 
-message ResetPasswordRequest{
-    string sessionID = 1;
-    string new_password = 2;
+message ResetEmailAfterLoginRequest{
+    string new_email = 1;
 }
 
-message ResetPhoneNumberRequest{
-    string sessionID = 1;
-    string new_phone_number = 2;
+message ResetPasswordAfterLoginRequest{
+    string new_password = 1;
+}
+
+message ResetPhoneNumberAfterLoginRequest{
+    string new_phone_number = 1;
 }
 
 message ResetResponse{
@@ -77,14 +79,21 @@ service UserService {
         };
     }
 
-    rpc ResetPassword (ResetPasswordRequest) returns (ResetResponse){
+    rpc ResetEmailAfterLogin (ResetEmailAfterLoginRequest) returns (ResetResponse){
+        option (google.api.http) = {
+            put: "/reset-email",
+            body: "*"
+        };
+    }
+
+    rpc ResetPasswordAfterLogin (ResetPasswordAfterLoginRequest) returns (ResetResponse){
         option (google.api.http) = {
             put: "/reset-password",
             body: "*"
         };
     }
 
-    rpc ResetPhoneNumber (ResetPhoneNumberRequest) returns (ResetResponse){
+    rpc ResetPhoneNumberAfterLogin (ResetPhoneNumberAfterLoginRequest) returns (ResetResponse){
         option (google.api.http) = {
             put: "/reset-phone-number",
             body: "*"

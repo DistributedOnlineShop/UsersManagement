@@ -21,7 +21,7 @@ func (s *Server) CreateSessionId(ctx context.Context, req *pbs.CreateSessionIdRe
 		SessionID: util.CreateUUID(),
 		Email:     payload.Email,
 		Token:     token,
-		Status:    "SignUp",
+		Status:    req.GetStatus(),
 		ExpiresAt: pgtype.Timestamp{Time: payload.ExpiredAt, Valid: true},
 	}
 
@@ -32,5 +32,6 @@ func (s *Server) CreateSessionId(ctx context.Context, req *pbs.CreateSessionIdRe
 
 	return &pbs.CreateSessionIdResponse{
 		SessionId: session.SessionID.String(),
+		Token:     token,
 	}, nil
 }

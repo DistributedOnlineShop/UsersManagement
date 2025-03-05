@@ -25,7 +25,7 @@ FROM
 WHERE
     EMAIL = $1 LIMIT 1;
 
--- name: GetUserById :one
+-- name: GetUserByEmail :one
 SELECT
     frist_name,
     last_name,
@@ -34,28 +34,28 @@ SELECT
 FROM 
     USERS
 WHERE
-    user_id = $1;
+    email = $1;
 
--- name: ResetPassword :one
+-- name: ResetPassword :exec
 UPDATE USERS
 SET
     PASSWORD_HASH = $2,
     UPDATED_AT = NOW()
 WHERE
-    EMAIL = $1 RETURNING *;
+    EMAIL = $1;
 
--- name: ResetEmail :one
+-- name: ResetEmail :exec
 UPDATE USERS
 SET
     EMAIL = $2,
     UPDATED_AT = NOW()
 WHERE
-    phone_number = $1 RETURNING *;
+    phone_number = $1;
 
--- name: ResetPhoneNumber :one
+-- name: ResetPhoneNumber :exec
 UPDATE USERS
 SET
     phone_number = $2,
     UPDATED_AT = NOW()
 WHERE
-    EMAIL = $1 RETURNING *;;
+    EMAIL = $1;

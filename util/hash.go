@@ -14,7 +14,7 @@ func Hash(password, salt string) ([]byte, error) {
 	return hash, nil
 }
 
-func Verify(password, salt string, hash []byte) bool {
+func VerifyHashPassword(password, salt string, hash []byte) bool {
 	Config, err := LoadConfig("../")
 	if err != nil {
 		return false

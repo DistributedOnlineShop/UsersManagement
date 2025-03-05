@@ -19,11 +19,12 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	UserService_UserInformations_FullMethodName = "/pb.UserService/UserInformations"
-	UserService_SignUp_FullMethodName           = "/pb.UserService/SignUp"
-	UserService_Login_FullMethodName            = "/pb.UserService/Login"
-	UserService_ResetPassword_FullMethodName    = "/pb.UserService/ResetPassword"
-	UserService_ResetPhoneNumber_FullMethodName = "/pb.UserService/ResetPhoneNumber"
+	UserService_UserInformations_FullMethodName           = "/pb.UserService/UserInformations"
+	UserService_SignUp_FullMethodName                     = "/pb.UserService/SignUp"
+	UserService_Login_FullMethodName                      = "/pb.UserService/Login"
+	UserService_ResetEmailAfterLogin_FullMethodName       = "/pb.UserService/ResetEmailAfterLogin"
+	UserService_ResetPasswordAfterLogin_FullMethodName    = "/pb.UserService/ResetPasswordAfterLogin"
+	UserService_ResetPhoneNumberAfterLogin_FullMethodName = "/pb.UserService/ResetPhoneNumberAfterLogin"
 )
 
 // UserServiceClient is the client API for UserService service.
@@ -33,8 +34,9 @@ type UserServiceClient interface {
 	UserInformations(ctx context.Context, in *UserInformationRequest, opts ...grpc.CallOption) (*UserInformationResponse, error)
 	SignUp(ctx context.Context, in *SignUpRequest, opts ...grpc.CallOption) (*SignUpResponse, error)
 	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
-	ResetPassword(ctx context.Context, in *ResetPasswordRequest, opts ...grpc.CallOption) (*ResetResponse, error)
-	ResetPhoneNumber(ctx context.Context, in *ResetPhoneNumberRequest, opts ...grpc.CallOption) (*ResetResponse, error)
+	ResetEmailAfterLogin(ctx context.Context, in *ResetEmailAfterLoginRequest, opts ...grpc.CallOption) (*ResetResponse, error)
+	ResetPasswordAfterLogin(ctx context.Context, in *ResetPasswordAfterLoginRequest, opts ...grpc.CallOption) (*ResetResponse, error)
+	ResetPhoneNumberAfterLogin(ctx context.Context, in *ResetPhoneNumberAfterLoginRequest, opts ...grpc.CallOption) (*ResetResponse, error)
 }
 
 type userServiceClient struct {
@@ -72,18 +74,27 @@ func (c *userServiceClient) Login(ctx context.Context, in *LoginRequest, opts ..
 	return out, nil
 }
 
-func (c *userServiceClient) ResetPassword(ctx context.Context, in *ResetPasswordRequest, opts ...grpc.CallOption) (*ResetResponse, error) {
+func (c *userServiceClient) ResetEmailAfterLogin(ctx context.Context, in *ResetEmailAfterLoginRequest, opts ...grpc.CallOption) (*ResetResponse, error) {
 	out := new(ResetResponse)
-	err := c.cc.Invoke(ctx, UserService_ResetPassword_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, UserService_ResetEmailAfterLogin_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *userServiceClient) ResetPhoneNumber(ctx context.Context, in *ResetPhoneNumberRequest, opts ...grpc.CallOption) (*ResetResponse, error) {
+func (c *userServiceClient) ResetPasswordAfterLogin(ctx context.Context, in *ResetPasswordAfterLoginRequest, opts ...grpc.CallOption) (*ResetResponse, error) {
 	out := new(ResetResponse)
-	err := c.cc.Invoke(ctx, UserService_ResetPhoneNumber_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, UserService_ResetPasswordAfterLogin_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) ResetPhoneNumberAfterLogin(ctx context.Context, in *ResetPhoneNumberAfterLoginRequest, opts ...grpc.CallOption) (*ResetResponse, error) {
+	out := new(ResetResponse)
+	err := c.cc.Invoke(ctx, UserService_ResetPhoneNumberAfterLogin_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -97,8 +108,9 @@ type UserServiceServer interface {
 	UserInformations(context.Context, *UserInformationRequest) (*UserInformationResponse, error)
 	SignUp(context.Context, *SignUpRequest) (*SignUpResponse, error)
 	Login(context.Context, *LoginRequest) (*LoginResponse, error)
-	ResetPassword(context.Context, *ResetPasswordRequest) (*ResetResponse, error)
-	ResetPhoneNumber(context.Context, *ResetPhoneNumberRequest) (*ResetResponse, error)
+	ResetEmailAfterLogin(context.Context, *ResetEmailAfterLoginRequest) (*ResetResponse, error)
+	ResetPasswordAfterLogin(context.Context, *ResetPasswordAfterLoginRequest) (*ResetResponse, error)
+	ResetPhoneNumberAfterLogin(context.Context, *ResetPhoneNumberAfterLoginRequest) (*ResetResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -115,11 +127,14 @@ func (UnimplementedUserServiceServer) SignUp(context.Context, *SignUpRequest) (*
 func (UnimplementedUserServiceServer) Login(context.Context, *LoginRequest) (*LoginResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
 }
-func (UnimplementedUserServiceServer) ResetPassword(context.Context, *ResetPasswordRequest) (*ResetResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ResetPassword not implemented")
+func (UnimplementedUserServiceServer) ResetEmailAfterLogin(context.Context, *ResetEmailAfterLoginRequest) (*ResetResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ResetEmailAfterLogin not implemented")
 }
-func (UnimplementedUserServiceServer) ResetPhoneNumber(context.Context, *ResetPhoneNumberRequest) (*ResetResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ResetPhoneNumber not implemented")
+func (UnimplementedUserServiceServer) ResetPasswordAfterLogin(context.Context, *ResetPasswordAfterLoginRequest) (*ResetResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ResetPasswordAfterLogin not implemented")
+}
+func (UnimplementedUserServiceServer) ResetPhoneNumberAfterLogin(context.Context, *ResetPhoneNumberAfterLoginRequest) (*ResetResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ResetPhoneNumberAfterLogin not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 
@@ -188,38 +203,56 @@ func _UserService_Login_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UserService_ResetPassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ResetPasswordRequest)
+func _UserService_ResetEmailAfterLogin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ResetEmailAfterLoginRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UserServiceServer).ResetPassword(ctx, in)
+		return srv.(UserServiceServer).ResetEmailAfterLogin(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: UserService_ResetPassword_FullMethodName,
+		FullMethod: UserService_ResetEmailAfterLogin_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).ResetPassword(ctx, req.(*ResetPasswordRequest))
+		return srv.(UserServiceServer).ResetEmailAfterLogin(ctx, req.(*ResetEmailAfterLoginRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UserService_ResetPhoneNumber_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ResetPhoneNumberRequest)
+func _UserService_ResetPasswordAfterLogin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ResetPasswordAfterLoginRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UserServiceServer).ResetPhoneNumber(ctx, in)
+		return srv.(UserServiceServer).ResetPasswordAfterLogin(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: UserService_ResetPhoneNumber_FullMethodName,
+		FullMethod: UserService_ResetPasswordAfterLogin_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).ResetPhoneNumber(ctx, req.(*ResetPhoneNumberRequest))
+		return srv.(UserServiceServer).ResetPasswordAfterLogin(ctx, req.(*ResetPasswordAfterLoginRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_ResetPhoneNumberAfterLogin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ResetPhoneNumberAfterLoginRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).ResetPhoneNumberAfterLogin(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_ResetPhoneNumberAfterLogin_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).ResetPhoneNumberAfterLogin(ctx, req.(*ResetPhoneNumberAfterLoginRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -244,12 +277,16 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _UserService_Login_Handler,
 		},
 		{
-			MethodName: "ResetPassword",
-			Handler:    _UserService_ResetPassword_Handler,
+			MethodName: "ResetEmailAfterLogin",
+			Handler:    _UserService_ResetEmailAfterLogin_Handler,
 		},
 		{
-			MethodName: "ResetPhoneNumber",
-			Handler:    _UserService_ResetPhoneNumber_Handler,
+			MethodName: "ResetPasswordAfterLogin",
+			Handler:    _UserService_ResetPasswordAfterLogin_Handler,
+		},
+		{
+			MethodName: "ResetPhoneNumberAfterLogin",
+			Handler:    _UserService_ResetPhoneNumberAfterLogin_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

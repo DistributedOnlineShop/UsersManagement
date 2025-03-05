@@ -15,6 +15,6 @@ func TestHash(t *testing.T) {
 	require.NotEmpty(t, Hash)
 	require.Len(t, Hash, 32)
 
-	verified := Verify(password, salt, Hash)
+	verified := VerifyHashPassword(password, salt, Hash)
 	require.True(t, verified)
 }

@@ -47,7 +47,7 @@ func TestCreateUser(t *testing.T) {
 func TestGetUserById(t *testing.T) {
 	user := CreateRandomUser(t)
 
-	row, err := testStore.GetUserById(context.Background(), user.UserID)
+	row, err := testStore.GetUserByEmail(context.Background(), user.Email)
 	require.NoError(t, err)
 	require.NotEmpty(t, row)
 }
@@ -60,13 +60,8 @@ func TestResetEmail(t *testing.T) {
 		Email:       gofakeit.Email(),
 	}
 
-	updatedUser, err := testStore.ResetEmail(context.Background(), newData)
+	err := testStore.ResetEmail(context.Background(), newData)
 	require.NoError(t, err)
-	require.NotEqual(t, user.Email, updatedUser.Email)
-	require.Equal(t, user.UserID, updatedUser.UserID)
-	require.Equal(t, newData.PhoneNumber, updatedUser.PhoneNumber)
-	require.Equal(t, newData.Email, updatedUser.Email)
-	require.NotZero(t, updatedUser.UpdatedAt)
 }
 
 func TestResetPassword(t *testing.T) {
@@ -82,12 +77,8 @@ func TestResetPassword(t *testing.T) {
 		PasswordHash: hash,
 	}
 
-	updatedUser, err := testStore.ResetPassword(context.Background(), newData)
+	err = testStore.ResetPassword(context.Background(), newData)
 	require.NoError(t, err)
-	require.Equal(t, user.Email, updatedUser.Email)
-	require.Equal(t, user.UserID, updatedUser.UserID)
-	require.NotEqual(t, user.PasswordHash, updatedUser.PasswordHash)
-	require.NotZero(t, updatedUser.UpdatedAt)
 }
 
 func TestResetPhoneNumber(t *testing.T) {
@@ -98,12 +89,8 @@ func TestResetPhoneNumber(t *testing.T) {
 		PhoneNumber: gofakeit.Phone(),
 	}
 
-	updatedUser, err := testStore.ResetPhoneNumber(context.Background(), newData)
+	err := testStore.ResetPhoneNumber(context.Background(), newData)
 	require.NoError(t, err)
-	require.Equal(t, user.Email, updatedUser.Email)
-	require.Equal(t, user.UserID, updatedUser.UserID)
-	require.NotEqual(t, user.PhoneNumber, updatedUser.PhoneNumber)
-	require.NotZero(t, updatedUser.UpdatedAt)
 }
 
 func TestUserLogin(t *testing.T) {
