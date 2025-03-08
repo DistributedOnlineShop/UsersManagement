@@ -6,6 +6,7 @@ INSERT INTO USERS (
     EMAIL,
     PHONE_NUMBER,
     PASSWORD_HASH,
+    ROLE,
     STATUS
 ) VALUES(
     $1,
@@ -14,12 +15,14 @@ INSERT INTO USERS (
     $4,
     $5,
     $6,
-    $7
+    $7,
+    $8
 ) RETURNING *;
 
 -- name: UserLogin :one
 SELECT
-    PASSWORD_HASH
+    PASSWORD_HASH,
+    ROLE
 FROM 
     USERS
 WHERE
@@ -27,10 +30,7 @@ WHERE
 
 -- name: GetUserByEmail :one
 SELECT
-    frist_name,
-    last_name,
-    email,
-    phone_number
+    *
 FROM 
     USERS
 WHERE

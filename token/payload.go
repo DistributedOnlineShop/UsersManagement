@@ -17,7 +17,6 @@ type Payload struct {
 
 func NewPayload(email, role string) (*Payload, error) {
 	tokenID := uuid.New()
-
 	return &Payload{
 		ID:        tokenID,
 		Email:     email,

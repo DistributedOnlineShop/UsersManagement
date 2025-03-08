@@ -31,7 +31,6 @@ func (s *Server) CreateSessionId(ctx context.Context, req *pbs.CreateSessionIdRe
 	}
 
 	return &pbs.CreateSessionIdResponse{
-		SessionId: session.SessionID.String(),
-		Token:     token,
+		Token: session.Token,
 	}, nil
 }

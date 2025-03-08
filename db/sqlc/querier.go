@@ -15,15 +15,15 @@ type Querier interface {
 	CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	DeleteAddress(ctx context.Context, arg DeleteAddressParams) error
-	GetAddressesByUserID(ctx context.Context, userID uuid.UUID) ([]GetAddressesByUserIDRow, error)
-	GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error)
-	ResetDefaultAddress(ctx context.Context, addressID uuid.UUID) (Address, error)
+	GetAddressesByUserID(ctx context.Context, userID uuid.UUID) ([]Address, error)
+	GetUserByEmail(ctx context.Context, email string) (User, error)
 	ResetEmail(ctx context.Context, arg ResetEmailParams) error
 	ResetPassword(ctx context.Context, arg ResetPasswordParams) error
 	ResetPhoneNumber(ctx context.Context, arg ResetPhoneNumberParams) error
-	SetDefaultAddress(ctx context.Context, addressID uuid.UUID) (Address, error)
-	UpdateAddress(ctx context.Context, arg UpdateAddressParams) (Address, error)
-	UserLogin(ctx context.Context, email string) ([]byte, error)
+	SetAllAddresstoFalse(ctx context.Context, userID uuid.UUID) error
+	SetDefaultAddress(ctx context.Context, arg SetDefaultAddressParams) error
+	UpdateAddress(ctx context.Context, arg UpdateAddressParams) error
+	UserLogin(ctx context.Context, email string) (UserLoginRow, error)
 }
 
 var _ Querier = (*Queries)(nil)

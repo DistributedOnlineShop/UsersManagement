@@ -16,6 +16,7 @@ import (
 
 	db "UsersManagement/db/sqlc"
 	"UsersManagement/gapi"
+	pba "UsersManagement/pb/addresses"
 	pbv "UsersManagement/pb/session"
 	pbu "UsersManagement/pb/users"
 	"UsersManagement/util"
@@ -53,6 +54,7 @@ func main() {
 
 	pbv.RegisterSessionServer(grpcServer, server)
 	pbu.RegisterUserServiceServer(grpcServer, server)
+	pba.RegisterAddressesServer(grpcServer, server)
 
 	reflection.Register(grpcServer)
 

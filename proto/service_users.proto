@@ -3,12 +3,11 @@ syntax="proto3";
 package pb;
 
 import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+
 
 option go_package = "Email/pb/users";
 
-message UserInformationRequest{
-    string sessionID = 1;
-}
 
 message UserInformationResponse{
     string email = 1;
@@ -38,8 +37,7 @@ message LoginRequest{
 }
 
 message LoginResponse{
-    string session_id = 1;
-    string token = 2;
+    string token = 1;
 }
 
 message ResetEmailAfterLoginRequest{
@@ -59,13 +57,13 @@ message ResetResponse{
 }
 
 service UserService {
-    rpc UserInformations (UserInformationRequest) returns (UserInformationResponse){
+    rpc UserInformations (google.protobuf.Empty) returns (UserInformationResponse){
         option (google.api.http) ={
             get: "/users/informations",
         };
     }
 
-    rpc SignUp (SignUpRequest) returns (SignUpResponse){
+    rpc SignUpUser (SignUpRequest) returns (SignUpResponse){
         option (google.api.http) = {
             post: "/users/signup",
             body: "*"

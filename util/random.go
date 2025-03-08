@@ -65,3 +65,11 @@ func GenerateUserStatus() string {
 	}
 	return statuses[rand.IntN(len(statuses))]
 }
+
+func GenerateUserRole() string {
+	statuses := []string{
+		"USER",
+		"ADMIN",
+	}
+	return statuses[rand.IntN(len(statuses))]
+}

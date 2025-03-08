@@ -5,13 +5,14 @@ import (
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
 
 	db "UsersManagement/db/sqlc"
 	pbu "UsersManagement/pb/users"
 	"UsersManagement/util"
 )
 
-func (s *Server) SignUp(ctx context.Context, req *pbu.SignUpRequest) (*pbu.SignUpResponse, error) {
+func (s *Server) SignUpUser(ctx context.Context, req *pbu.SignUpRequest) (*pbu.SignUpResponse, error) {
 	payload, err := s.AuthorizeUser(ctx)
 	if err != nil {
 		return nil, status.Errorf(codes.Unauthenticated, "Fail to Verify User")
@@ -45,7 +46,7 @@ func (s *Server) SignUp(ctx context.Context, req *pbu.SignUpRequest) (*pbu.SignU
 	}, nil
 }
 
-func (s *Server) UserInformations(ctx context.Context, req *pbu.UserInformationRequest) (*pbu.UserInformationResponse, error) {
+func (s *Server) UserInformations(ctx context.Context, e *emptypb.Empty) (*pbu.UserInformationResponse, error) {
 	payload, err := s.AuthorizeUser(ctx)
 	if err != nil {
 		return nil, status.Errorf(codes.Unauthenticated, "Fail to Verify User")
@@ -65,17 +66,17 @@ func (s *Server) UserInformations(ctx context.Context, req *pbu.UserInformationR
 }
 
 func (s *Server) Login(ctx context.Context, req *pbu.LoginRequest) (*pbu.LoginResponse, error) {
-	hashPassword, err := s.store.UserLogin(ctx, req.GetEmail())
+	hash, err := s.store.UserLogin(ctx, req.GetEmail())
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Fail to get user information")
 	}
 
-	valid := util.VerifyHashPassword(req.GetPassword(), req.GetEmail(), hashPassword)
+	valid := util.VerifyHashPassword(req.GetPassword(), req.GetEmail(), hash.PasswordHash)
 	if !valid {
 		return nil, status.Errorf(codes.Unauthenticated, "Invalid password")
 	}
 
-	token, payload, err := s.token.CreateToken(req.GetEmail(), "user")
+	token, payload, err := s.token.CreateToken(req.GetEmail(), hash.Role)
 	if err != nil {
 		return nil, status.Errorf(codes.Unauthenticated, "Fail to Create payload")
 	}
@@ -84,7 +85,7 @@ func (s *Server) Login(ctx context.Context, req *pbu.LoginRequest) (*pbu.LoginRe
 		SessionID: util.CreateUUID(),
 		Email:     payload.Email,
 		Token:     token,
-		Status:    util.GenerateSessionStatus(),
+		Status:    "LOGIN",
 		ExpiresAt: util.GenerateDate(),
 	}
 
@@ -94,8 +95,7 @@ func (s *Server) Login(ctx context.Context, req *pbu.LoginRequest) (*pbu.LoginRe
 	}
 
 	return &pbu.LoginResponse{
-		SessionId: session.SessionID.String(),
-		Token:     session.Token,
+		Token: session.Token,
 	}, nil
 }
 

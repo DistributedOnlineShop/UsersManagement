@@ -24,6 +24,7 @@ func CreateRandomUser(t *testing.T) User {
 		Email:        email,
 		PhoneNumber:  gofakeit.Phone(),
 		PasswordHash: hash,
+		Role:         util.GenerateUserRole(),
 		Status:       util.GenerateUserStatus(),
 	}
 
@@ -98,5 +99,6 @@ func TestUserLogin(t *testing.T) {
 
 	hash, err := testStore.UserLogin(context.Background(), user.Email)
 	require.NoError(t, err)
-	require.NotEmpty(t, hash)
+	require.NotEmpty(t, hash.PasswordHash)
+	require.NotEmpty(t, hash.Role)
 }

@@ -3,22 +3,25 @@ CREATE TABLE "users" (
   "frist_name" VARCHAR NOT NULL,
   "last_name" VARCHAR NOT NULL,
   "email" VARCHAR UNIQUE NOT NULL,
-  "phone_number" VARCHAR UNIQUE NOT NULL,
+  "phone_number" VARCHAR NOT NULL,
   "password_hash" BYTEA NOT NULL,
+  "role" VARCHAR NOT NULL,
   "status" VARCHAR NOT NULL,
   "created_at" TIMESTAMP(0) NOT NULL DEFAULT NOW(),
   "updated_at" TIMESTAMP(0)
 );
 
 CREATE TABLE "addresses" (
-  "address_id" UUID PRIMARY KEY NOT NULL UNIQUE,
+  "address_id" UUID PRIMARY KEY NOT NULL,
   "user_id" UUID NOT NULL,
-  "address" VARCHAR(100) NOT NULL,
-  "city" VARCHAR(50) NOT NULL,
-  "state" VARCHAR(50) NOT NULL,
-  "postal_code" VARCHAR(10) NOT NULL,
+  "flat_floor" VARCHAR(50),
+  "building" VARCHAR(255),
+  "street" VARCHAR(255) NOT NULL,
+  "district" VARCHAR(100) NOT NULL,
+  "region" VARCHAR(50) NOT NULL,
   "country" VARCHAR(50) NOT NULL,
-  "is_default" BOOLEAN NOT NULL DEFAULT true,
+  "zip_code" VARCHAR(50),
+  "is_default" BOOLEAN NOT NULL DEFAULT false,
   "created_at" TIMESTAMP(0) NOT NULL DEFAULT NOW(),
   "updated_at" TIMESTAMP(0)
 );

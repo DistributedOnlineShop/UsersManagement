@@ -33,6 +33,7 @@ server:
 protob:
 	rm -f pb/users/*.go
 	rm -f pb/session/*.go
+	rm -f pb/addresses/*.go
 
 	protoc --proto_path=proto --go_out=pb/users --go_opt=paths=source_relative \
 	--go-grpc_out=pb/users --go-grpc_opt=paths=source_relative \
@@ -44,4 +45,9 @@ protob:
 	--grpc-gateway_out=pb/session --grpc-gateway_opt paths=source_relative \
     proto/service_session.proto
 
-.PHONY: postgres dropPsql createDB dropDB migrateup migratedown sqlc redis dropRedis test server protob
+	protoc --proto_path=proto --go_out=pb/addresses --go_opt=paths=source_relative \
+	--go-grpc_out=pb/addresses --go-grpc_opt=paths=source_relative \
+	--grpc-gateway_out=pb/addresses --grpc-gateway_opt paths=source_relative \
+    proto/service_addresses.proto
+
+.PHONY: postgres dropPsql createDB dropDB migrateup migratedown sqlc test server protob

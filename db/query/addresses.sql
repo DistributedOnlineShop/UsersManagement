@@ -2,11 +2,13 @@
 INSERT INTO ADDRESSES (
     ADDRESS_ID,
     USER_ID,
-    ADDRESS,
-    CITY,
-    STATE,
-    POSTAL_CODE,
-    COUNTRY,
+    flat_floor,
+    building,
+    street,
+    district,
+    region,
+    country,
+    zip_code,
     IS_DEFAULT
 ) VALUES(
     $1,
@@ -16,51 +18,49 @@ INSERT INTO ADDRESSES (
     $5,
     $6,
     $7,
-    $8
+    $8,
+    $9,
+    $10
 ) RETURNING *;
 
 -- name: GetAddressesByUserID :many
 SELECT 
-    ADDRESS_ID,
-    ADDRESS,
-    CITY,
-    STATE,
-    POSTAL_CODE,
-    COUNTRY,
-    IS_DEFAULT
+    *
 FROM 
     ADDRESSES 
 WHERE 
     USER_ID = $1;
 
--- name: UpdateAddress :one
+-- name: UpdateAddress :exec
 UPDATE ADDRESSES
 SET
-    ADDRESS = $2,
-    CITY = $3,
-    STATE = $4,
-    POSTAL_CODE = $5,
-    COUNTRY = $6,
-    IS_DEFAULT = $7,
+    flat_floor = $3,
+    building = $4,
+    street = $5,
+    district = $6,
+    region = $7,
+    country = $8,
+    zip_code = $9,
+    IS_DEFAULT = $10,
     UPDATED_AT = NOW()
 WHERE
-    ADDRESS_ID = $1 RETURNING *;
+    ADDRESS_ID = $1 AND user_id = $2;
 
--- name: ResetDefaultAddress :one
+-- name: SetAllAddresstoFalse :exec
 UPDATE ADDRESSES
 SET 
     IS_DEFAULT = FALSE
 WHERE 
-    ADDRESS_ID = $1 RETURNING *;
+    user_id = $1;
 
--- name: SetDefaultAddress :one
+-- name: SetDefaultAddress :exec
 UPDATE ADDRESSES
 SET
     IS_DEFAULT = TRUE
 WHERE
-    ADDRESS_ID = $1 RETURNING *;
+    ADDRESS_ID = $1 AND user_id = $2;
 
 -- name: DeleteAddress :exec
 DELETE FROM ADDRESSES
 WHERE
-    USER_ID = $1 AND ADDRESS_ID = $2;
+    ADDRESS_ID = $1 AND USER_ID = $2;

@@ -10,16 +10,18 @@ import (
 )
 
 type Address struct {
-	AddressID  uuid.UUID        `json:"address_id"`
-	UserID     uuid.UUID        `json:"user_id"`
-	Address    string           `json:"address"`
-	City       string           `json:"city"`
-	State      string           `json:"state"`
-	PostalCode string           `json:"postal_code"`
-	Country    string           `json:"country"`
-	IsDefault  bool             `json:"is_default"`
-	CreatedAt  pgtype.Timestamp `json:"created_at"`
-	UpdatedAt  pgtype.Timestamp `json:"updated_at"`
+	AddressID uuid.UUID        `json:"address_id"`
+	UserID    uuid.UUID        `json:"user_id"`
+	FlatFloor pgtype.Text      `json:"flat_floor"`
+	Building  pgtype.Text      `json:"building"`
+	Street    string           `json:"street"`
+	District  string           `json:"district"`
+	Region    string           `json:"region"`
+	Country   string           `json:"country"`
+	ZipCode   pgtype.Text      `json:"zip_code"`
+	IsDefault bool             `json:"is_default"`
+	CreatedAt pgtype.Timestamp `json:"created_at"`
+	UpdatedAt pgtype.Timestamp `json:"updated_at"`
 }
 
 type Session struct {
@@ -38,6 +40,7 @@ type User struct {
 	Email        string           `json:"email"`
 	PhoneNumber  string           `json:"phone_number"`
 	PasswordHash []byte           `json:"password_hash"`
+	Role         string           `json:"role"`
 	Status       string           `json:"status"`
 	CreatedAt    pgtype.Timestamp `json:"created_at"`
 	UpdatedAt    pgtype.Timestamp `json:"updated_at"`

@@ -9,17 +9,20 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createAddress = `-- name: CreateAddress :one
 INSERT INTO ADDRESSES (
     ADDRESS_ID,
     USER_ID,
-    ADDRESS,
-    CITY,
-    STATE,
-    POSTAL_CODE,
-    COUNTRY,
+    flat_floor,
+    building,
+    street,
+    district,
+    region,
+    country,
+    zip_code,
     IS_DEFAULT
 ) VALUES(
     $1,
@@ -29,41 +32,49 @@ INSERT INTO ADDRESSES (
     $5,
     $6,
     $7,
-    $8
-) RETURNING address_id, user_id, address, city, state, postal_code, country, is_default, created_at, updated_at
+    $8,
+    $9,
+    $10
+) RETURNING address_id, user_id, flat_floor, building, street, district, region, country, zip_code, is_default, created_at, updated_at
 `
 
 type CreateAddressParams struct {
-	AddressID  uuid.UUID `json:"address_id"`
-	UserID     uuid.UUID `json:"user_id"`
-	Address    string    `json:"address"`
-	City       string    `json:"city"`
-	State      string    `json:"state"`
-	PostalCode string    `json:"postal_code"`
-	Country    string    `json:"country"`
-	IsDefault  bool      `json:"is_default"`
+	AddressID uuid.UUID   `json:"address_id"`
+	UserID    uuid.UUID   `json:"user_id"`
+	FlatFloor pgtype.Text `json:"flat_floor"`
+	Building  pgtype.Text `json:"building"`
+	Street    string      `json:"street"`
+	District  string      `json:"district"`
+	Region    string      `json:"region"`
+	Country   string      `json:"country"`
+	ZipCode   pgtype.Text `json:"zip_code"`
+	IsDefault bool        `json:"is_default"`
 }
 
 func (q *Queries) CreateAddress(ctx context.Context, arg CreateAddressParams) (Address, error) {
 	row := q.db.QueryRow(ctx, createAddress,
 		arg.AddressID,
 		arg.UserID,
-		arg.Address,
-		arg.City,
-		arg.State,
-		arg.PostalCode,
+		arg.FlatFloor,
+		arg.Building,
+		arg.Street,
+		arg.District,
+		arg.Region,
 		arg.Country,
+		arg.ZipCode,
 		arg.IsDefault,
 	)
 	var i Address
 	err := row.Scan(
 		&i.AddressID,
 		&i.UserID,
-		&i.Address,
-		&i.City,
-		&i.State,
-		&i.PostalCode,
+		&i.FlatFloor,
+		&i.Building,
+		&i.Street,
+		&i.District,
+		&i.Region,
 		&i.Country,
+		&i.ZipCode,
 		&i.IsDefault,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -74,61 +85,50 @@ func (q *Queries) CreateAddress(ctx context.Context, arg CreateAddressParams) (A
 const deleteAddress = `-- name: DeleteAddress :exec
 DELETE FROM ADDRESSES
 WHERE
-    USER_ID = $1 AND ADDRESS_ID = $2
+    ADDRESS_ID = $1 AND USER_ID = $2
 `
 
 type DeleteAddressParams struct {
-	UserID    uuid.UUID `json:"user_id"`
 	AddressID uuid.UUID `json:"address_id"`
+	UserID    uuid.UUID `json:"user_id"`
 }
 
 func (q *Queries) DeleteAddress(ctx context.Context, arg DeleteAddressParams) error {
-	_, err := q.db.Exec(ctx, deleteAddress, arg.UserID, arg.AddressID)
+	_, err := q.db.Exec(ctx, deleteAddress, arg.AddressID, arg.UserID)
 	return err
 }
 
 const getAddressesByUserID = `-- name: GetAddressesByUserID :many
 SELECT 
-    ADDRESS_ID,
-    ADDRESS,
-    CITY,
-    STATE,
-    POSTAL_CODE,
-    COUNTRY,
-    IS_DEFAULT
+    address_id, user_id, flat_floor, building, street, district, region, country, zip_code, is_default, created_at, updated_at
 FROM 
     ADDRESSES 
 WHERE 
     USER_ID = $1
 `
 
-type GetAddressesByUserIDRow struct {
-	AddressID  uuid.UUID `json:"address_id"`
-	Address    string    `json:"address"`
-	City       string    `json:"city"`
-	State      string    `json:"state"`
-	PostalCode string    `json:"postal_code"`
-	Country    string    `json:"country"`
-	IsDefault  bool      `json:"is_default"`
-}
-
-func (q *Queries) GetAddressesByUserID(ctx context.Context, userID uuid.UUID) ([]GetAddressesByUserIDRow, error) {
+func (q *Queries) GetAddressesByUserID(ctx context.Context, userID uuid.UUID) ([]Address, error) {
 	rows, err := q.db.Query(ctx, getAddressesByUserID, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []GetAddressesByUserIDRow{}
+	items := []Address{}
 	for rows.Next() {
-		var i GetAddressesByUserIDRow
+		var i Address
 		if err := rows.Scan(
 			&i.AddressID,
-			&i.Address,
-			&i.City,
-			&i.State,
-			&i.PostalCode,
+			&i.UserID,
+			&i.FlatFloor,
+			&i.Building,
+			&i.Street,
+			&i.District,
+			&i.Region,
 			&i.Country,
+			&i.ZipCode,
 			&i.IsDefault,
+			&i.CreatedAt,
+			&i.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -140,104 +140,78 @@ func (q *Queries) GetAddressesByUserID(ctx context.Context, userID uuid.UUID) ([
 	return items, nil
 }
 
-const resetDefaultAddress = `-- name: ResetDefaultAddress :one
+const setAllAddresstoFalse = `-- name: SetAllAddresstoFalse :exec
 UPDATE ADDRESSES
 SET 
     IS_DEFAULT = FALSE
 WHERE 
-    ADDRESS_ID = $1 RETURNING address_id, user_id, address, city, state, postal_code, country, is_default, created_at, updated_at
+    user_id = $1
 `
 
-func (q *Queries) ResetDefaultAddress(ctx context.Context, addressID uuid.UUID) (Address, error) {
-	row := q.db.QueryRow(ctx, resetDefaultAddress, addressID)
-	var i Address
-	err := row.Scan(
-		&i.AddressID,
-		&i.UserID,
-		&i.Address,
-		&i.City,
-		&i.State,
-		&i.PostalCode,
-		&i.Country,
-		&i.IsDefault,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
+func (q *Queries) SetAllAddresstoFalse(ctx context.Context, userID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, setAllAddresstoFalse, userID)
+	return err
 }
 
-const setDefaultAddress = `-- name: SetDefaultAddress :one
+const setDefaultAddress = `-- name: SetDefaultAddress :exec
 UPDATE ADDRESSES
 SET
     IS_DEFAULT = TRUE
 WHERE
-    ADDRESS_ID = $1 RETURNING address_id, user_id, address, city, state, postal_code, country, is_default, created_at, updated_at
+    ADDRESS_ID = $1 AND user_id = $2
 `
 
-func (q *Queries) SetDefaultAddress(ctx context.Context, addressID uuid.UUID) (Address, error) {
-	row := q.db.QueryRow(ctx, setDefaultAddress, addressID)
-	var i Address
-	err := row.Scan(
-		&i.AddressID,
-		&i.UserID,
-		&i.Address,
-		&i.City,
-		&i.State,
-		&i.PostalCode,
-		&i.Country,
-		&i.IsDefault,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
+type SetDefaultAddressParams struct {
+	AddressID uuid.UUID `json:"address_id"`
+	UserID    uuid.UUID `json:"user_id"`
 }
 
-const updateAddress = `-- name: UpdateAddress :one
+func (q *Queries) SetDefaultAddress(ctx context.Context, arg SetDefaultAddressParams) error {
+	_, err := q.db.Exec(ctx, setDefaultAddress, arg.AddressID, arg.UserID)
+	return err
+}
+
+const updateAddress = `-- name: UpdateAddress :exec
 UPDATE ADDRESSES
 SET
-    ADDRESS = $2,
-    CITY = $3,
-    STATE = $4,
-    POSTAL_CODE = $5,
-    COUNTRY = $6,
-    IS_DEFAULT = $7,
+    flat_floor = $3,
+    building = $4,
+    street = $5,
+    district = $6,
+    region = $7,
+    country = $8,
+    zip_code = $9,
+    IS_DEFAULT = $10,
     UPDATED_AT = NOW()
 WHERE
-    ADDRESS_ID = $1 RETURNING address_id, user_id, address, city, state, postal_code, country, is_default, created_at, updated_at
+    ADDRESS_ID = $1 AND user_id = $2
 `
 
 type UpdateAddressParams struct {
-	AddressID  uuid.UUID `json:"address_id"`
-	Address    string    `json:"address"`
-	City       string    `json:"city"`
-	State      string    `json:"state"`
-	PostalCode string    `json:"postal_code"`
-	Country    string    `json:"country"`
-	IsDefault  bool      `json:"is_default"`
+	AddressID uuid.UUID   `json:"address_id"`
+	UserID    uuid.UUID   `json:"user_id"`
+	FlatFloor pgtype.Text `json:"flat_floor"`
+	Building  pgtype.Text `json:"building"`
+	Street    string      `json:"street"`
+	District  string      `json:"district"`
+	Region    string      `json:"region"`
+	Country   string      `json:"country"`
+	ZipCode   pgtype.Text `json:"zip_code"`
+	IsDefault bool        `json:"is_default"`
 }
 
-func (q *Queries) UpdateAddress(ctx context.Context, arg UpdateAddressParams) (Address, error) {
-	row := q.db.QueryRow(ctx, updateAddress,
+func (q *Queries) UpdateAddress(ctx context.Context, arg UpdateAddressParams) error {
+	_, err := q.db.Exec(ctx, updateAddress,
 		arg.AddressID,
-		arg.Address,
-		arg.City,
-		arg.State,
-		arg.PostalCode,
+		arg.UserID,
+		arg.FlatFloor,
+		arg.Building,
+		arg.Street,
+		arg.District,
+		arg.Region,
 		arg.Country,
+		arg.ZipCode,
 		arg.IsDefault,
 	)
-	var i Address
-	err := row.Scan(
-		&i.AddressID,
-		&i.UserID,
-		&i.Address,
-		&i.City,
-		&i.State,
-		&i.PostalCode,
-		&i.Country,
-		&i.IsDefault,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
+	return err
 }

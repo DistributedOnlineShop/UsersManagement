@@ -1,0 +1,83 @@
+syntax = "proto3";
+
+package pb;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+
+
+option go_package = "Email/pb/addresses";
+
+message Address {
+    string address_id = 1;
+    string user_id = 2;
+    string flat_floor = 3;
+    string building = 4;
+    string street = 5;
+    string district = 6;
+    string region = 7;
+    string country = 8;
+    string zip_code = 9;
+    bool is_default = 10;
+}
+
+message CreateAddressRequest {
+    string flat_floor = 1;
+    string building = 2;
+    string street = 3;
+    string district = 4;
+    string region = 5;
+    string country = 6;
+    string zip_code = 7;
+    bool is_default = 8;
+}
+
+message CreateAddressResponse {
+    Address address = 1;
+}
+
+message DeleteAddressRequest {
+    string address_id = 1;
+}
+
+message GetAddressRequest {
+    string user_id = 1;
+}
+
+message GetAddressResponse {
+    repeated Address address = 1;
+}
+
+message ResetDefaultAddressRequest {
+    string address_id = 1;
+    string user_id = 2;
+}
+
+
+service Addresses {
+    rpc CreateAddress (CreateAddressRequest) returns (CreateAddressResponse){
+        option (google.api.http) = {
+            post: "/address/create"
+            body: "*"
+        };
+    }
+
+    rpc DeleteAddress (DeleteAddressRequest) returns (google.protobuf.Empty){
+        option (google.api.http) = {
+            delete:"/address/del"
+        };
+    }
+
+    rpc GetAddress (GetAddressRequest) returns (GetAddressResponse){
+        option (google.api.http) = {
+            get: "/address/get"
+        };
+    }
+
+    rpc ResetDefaultAddress (ResetDefaultAddressRequest) returns (google.protobuf.Empty){
+        option (google.api.http) = {
+            post: "/address/default/reset"
+            body: "*"
+        };
+    }
+}
