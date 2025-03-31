@@ -3,11 +3,13 @@ syntax="proto3";
 package pb;
 
 import "google/api/annotations.proto";
-import "google/protobuf/empty.proto";
 
 
 option go_package = "Email/pb/users";
 
+message UserInformationRequest {
+    // string email = 1;
+}
 
 message UserInformationResponse{
     string email = 1;
@@ -57,7 +59,7 @@ message ResetResponse{
 }
 
 service UserService {
-    rpc UserInformations (google.protobuf.Empty) returns (UserInformationResponse){
+    rpc UserInformations (UserInformationRequest) returns (UserInformationResponse){
         option (google.api.http) ={
             get: "/users/informations",
         };

@@ -5,7 +5,6 @@ import (
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/types/known/emptypb"
 
 	db "UsersManagement/db/sqlc"
 	pbu "UsersManagement/pb/users"
@@ -46,7 +45,7 @@ func (s *Server) SignUpUser(ctx context.Context, req *pbu.SignUpRequest) (*pbu.S
 	}, nil
 }
 
-func (s *Server) UserInformations(ctx context.Context, e *emptypb.Empty) (*pbu.UserInformationResponse, error) {
+func (s *Server) UserInformations(ctx context.Context, req *pbu.UserInformationRequest) (*pbu.UserInformationResponse, error) {
 	payload, err := s.AuthorizeUser(ctx)
 	if err != nil {
 		return nil, status.Errorf(codes.Unauthenticated, "Fail to Verify User")
@@ -66,37 +65,71 @@ func (s *Server) UserInformations(ctx context.Context, e *emptypb.Empty) (*pbu.U
 }
 
 func (s *Server) Login(ctx context.Context, req *pbu.LoginRequest) (*pbu.LoginResponse, error) {
-	hash, err := s.store.UserLogin(ctx, req.GetEmail())
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "Fail to get user information")
-	}
+	payload, err := s.AuthorizeUser(ctx)
+	if err == nil {
+		err := payload.Valid()
 
-	valid := util.VerifyHashPassword(req.GetPassword(), req.GetEmail(), hash.PasswordHash)
-	if !valid {
-		return nil, status.Errorf(codes.Unauthenticated, "Invalid password")
-	}
+		if err == nil {
 
-	token, payload, err := s.token.CreateToken(req.GetEmail(), hash.Role)
-	if err != nil {
-		return nil, status.Errorf(codes.Unauthenticated, "Fail to Create payload")
-	}
+			token, payload, err := s.token.CreateToken(req.GetEmail(), payload.Role)
+			if err != nil {
+				return nil, status.Errorf(codes.Unauthenticated, "Fail to create extension payload")
+			}
 
-	data := db.CreateSessionParams{
-		SessionID: util.CreateUUID(),
-		Email:     payload.Email,
-		Token:     token,
-		Status:    "LOGIN",
-		ExpiresAt: util.GenerateDate(),
-	}
+			data := db.CreateSessionParams{
+				SessionID: util.CreateUUID(),
+				Email:     payload.Email,
+				Token:     token,
+				Status:    "LOGIN",
+				ExpiresAt: util.GenerateDate(),
+			}
 
-	session, err := s.store.CreateSession(ctx, data)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "Fail to Save Session")
-	}
+			session, err := s.store.CreateSession(ctx, data)
+			if err != nil {
+				return nil, status.Errorf(codes.Internal, "Fail to save extension session")
+			}
 
-	return &pbu.LoginResponse{
-		Token: session.Token,
-	}, nil
+			return &pbu.LoginResponse{
+				Token: session.Token,
+			}, nil
+		}
+
+		return &pbu.LoginResponse{}, nil
+
+	} else {
+		
+		hash, err := s.store.UserLogin(ctx, req.GetEmail())
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "Fail to get user information")
+		}
+
+		valid := util.VerifyHashPassword(req.GetPassword(), req.GetEmail(), hash.PasswordHash)
+		if !valid {
+			return nil, status.Errorf(codes.Unauthenticated, "Invalid password")
+		}
+
+		token, payload, err := s.token.CreateToken(req.GetEmail(), hash.Role)
+		if err != nil {
+			return nil, status.Errorf(codes.Unauthenticated, "Fail to Create payload")
+		}
+
+		data := db.CreateSessionParams{
+			SessionID: util.CreateUUID(),
+			Email:     payload.Email,
+			Token:     token,
+			Status:    "LOGIN",
+			ExpiresAt: util.GenerateDate(),
+		}
+
+		session, err := s.store.CreateSession(ctx, data)
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "Fail to Save Session")
+		}
+
+		return &pbu.LoginResponse{
+			Token: session.Token,
+		}, nil
+	}
 }
 
 func (s *Server) ResetPasswordAfterLogin(ctx context.Context, req *pbu.ResetPasswordAfterLoginRequest) (*pbu.ResetResponse, error) {
